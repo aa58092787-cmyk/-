@@ -1,0 +1,10 @@
+import {mkdir,copyFile,writeFile} from 'node:fs/promises';
+const url=(process.env.SUPABASE_URL||'').trim();
+const key=(process.env.SUPABASE_PUBLISHABLE_KEY||'').trim();
+if(Boolean(url)!==Boolean(key))throw new Error('두 환경변수를 모두 설정하거나 둘 다 비워 주세요.');
+if(url&&!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url))throw new Error('SUPABASE_URL 형식을 확인하세요.');
+if(key&&!key.startsWith('sb_publishable_'))throw new Error('브라우저에는 Publishable key만 사용하세요.');
+await mkdir('dist',{recursive:true});
+await copyFile('index.html','dist/index.html');
+await writeFile('dist/config.js','window.APP_CONFIG = '+JSON.stringify({url,key}).replace(/</g,'\\u003c')+';\n');
+console.log(url?'LIVE 빌드 완료':'DEMO 빌드 완료');
